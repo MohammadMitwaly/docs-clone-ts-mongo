@@ -1,6 +1,7 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
+import { io } from "socket.io-client";
 
 const ToolbarOptions = [
   ["bold", "italic", "underline", "strike"], // toggled buttons
@@ -39,6 +40,13 @@ const Editor = () => {
     const editor = document.createElement("div");
     wrapper.append(editor);
     new Quill(editor, { theme: "snow", modules: { toolbar: ToolbarOptions } });
+  }, []);
+
+  useEffect(() => {
+    const socket = io("http://localhost:5000");
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   return <div className="container" ref={wrapperRef}></div>;
