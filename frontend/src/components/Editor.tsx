@@ -1,7 +1,8 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
+import { DefaultEventsMap } from "socket.io-client/build/typed-events";
 
 const ToolbarOptions = [
   ["bold", "italic", "underline", "strike"], // toggled buttons
@@ -32,6 +33,11 @@ const ToolbarOptions = [
 ];
 
 const Editor = () => {
+  const [connection, setConnection] = useState<
+    Socket<DefaultEventsMap, DefaultEventsMap> | undefined
+  >();
+  const [quillEditor, setQuillEditor] = useState<Quill | undefined>();
+
   const wrapperRef = useCallback((wrapper) => {
     if (wrapper == null) {
       return;
@@ -39,13 +45,18 @@ const Editor = () => {
     wrapper.innerHTML = "";
     const editor = document.createElement("div");
     wrapper.append(editor);
-    new Quill(editor, { theme: "snow", modules: { toolbar: ToolbarOptions } });
+    const tempQuilEditor = new Quill(editor, {
+      theme: "snow",
+      modules: { toolbar: ToolbarOptions },
+    });
+    setQuillEditor(tempQuilEditor);
   }, []);
 
   useEffect(() => {
-    const socket = io("http://localhost:5000");
+    const tempConnection = io("http://localhost:5000");
+    setConnection(tempConnection);
     return () => {
-      socket.disconnect();
+      tempConnection.disconnect();
     };
   }, []);
 

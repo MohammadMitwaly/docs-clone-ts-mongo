@@ -5,4 +5,6 @@ const IO = require("socket.io")(5000, {
   },
 });
 
-IO.on("connection", (socket) => {});
+IO.on("connection", (_socket) => {
+  console.log("Server is connected");
+});
