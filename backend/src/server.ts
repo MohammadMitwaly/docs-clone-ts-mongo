@@ -6,7 +6,14 @@ const IO = require("socket.io")(5000, {
 });
 
 IO.on("connection", (socket) => {
-  socket.on("send-changes", (delta) => {
-    socket.broadcast.emit("receive-changes", delta);
+  socket.on("get-document", (documentID) => {
+    // TODO: Update with data fetch
+    const tempData = "";
+    socket.join(documentID);
+    socket.emit("load-document", tempData);
+
+    socket.on("send-changes", (delta) => {
+      socket.broadcast.to(documentID).emit("receive-changes", delta);
+    });
   });
 });
