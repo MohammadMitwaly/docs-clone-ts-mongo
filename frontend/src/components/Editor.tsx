@@ -3,6 +3,7 @@ import Quill, { TextChangeHandler } from "quill";
 import "quill/dist/quill.snow.css";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io-client/build/typed-events";
+import { useParams } from "react-router-dom";
 
 const ToolbarOptions = [
   ["bold", "italic", "underline", "strike"], // toggled buttons
@@ -37,6 +38,8 @@ const Editor = () => {
     Socket<DefaultEventsMap, DefaultEventsMap> | undefined
   >();
   const [quillEditor, setQuillEditor] = useState<Quill | undefined>();
+  // Get the document ID from the URL
+  const { id: documentID } = useParams<{ id: string }>();
 
   const wrapperRef = useCallback((wrapper) => {
     if (wrapper == null) {
@@ -49,6 +52,8 @@ const Editor = () => {
       theme: "snow",
       modules: { toolbar: ToolbarOptions },
     });
+    tempQuilEditor.enable(false);
+    tempQuilEditor.setText("Loading document data, please wait...");
     setQuillEditor(tempQuilEditor);
   }, []);
 
@@ -97,6 +102,17 @@ const Editor = () => {
       connection.off("receive-changes", textChangeHandler);
     };
   }, [connection, quillEditor]);
+
+  useEffect(() => {
+    if (!connection || !quillEditor) {
+      return;
+    }
+    connection.once("load-document", (document) => {
+      quillEditor.setContents(document);
+      quillEditor.enable(true);
+    });
+    connection.emit("get-document", documentID);
+  }, [connection, quillEditor, documentID]);
 
   return <div className="container" ref={wrapperRef}></div>;
 };
