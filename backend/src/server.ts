@@ -1,4 +1,6 @@
-const IO = require("socket.io")(5000, {
+import { Server as SocketIO } from "socket.io";
+
+const IO = new SocketIO(5000, {
   cors: {
     origin: "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE"],
