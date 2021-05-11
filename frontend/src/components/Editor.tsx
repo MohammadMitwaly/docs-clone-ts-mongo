@@ -4,6 +4,7 @@ import "quill/dist/quill.snow.css";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io-client/build/typed-events";
 import { useParams } from "react-router-dom";
+import SaveTimerMS from "../enums/SaveTimeOut";
 
 const ToolbarOptions = [
   ["bold", "italic", "underline", "strike"], // toggled buttons
@@ -34,9 +35,8 @@ const ToolbarOptions = [
 ];
 
 const Editor = () => {
-  const [connection, setConnection] = useState<
-    Socket<DefaultEventsMap, DefaultEventsMap> | undefined
-  >();
+  const [connection, setConnection] =
+    useState<Socket<DefaultEventsMap, DefaultEventsMap> | undefined>();
   const [quillEditor, setQuillEditor] = useState<Quill | undefined>();
   // Get the document ID from the URL
   const { id: documentID } = useParams<{ id: string }>();
@@ -103,6 +103,7 @@ const Editor = () => {
     };
   }, [connection, quillEditor]);
 
+  // Handle loading and connecting to shared documents
   useEffect(() => {
     if (!connection || !quillEditor) {
       return;
@@ -113,6 +114,20 @@ const Editor = () => {
     });
     connection.emit("get-document", documentID);
   }, [connection, quillEditor, documentID]);
+
+  // Handle auto-saving every few seconds
+  useEffect(() => {
+    if (!connection || !quillEditor) {
+      return;
+    }
+    const saveInterval = setInterval(() => {
+      connection.emit("save-changes", quillEditor.getContents());
+    }, SaveTimerMS.INTERVAL_MS);
+
+    return () => {
+      clearInterval(saveInterval);
+    };
+  }, [connection, quillEditor]);
 
   return <div className="container" ref={wrapperRef}></div>;
 };
