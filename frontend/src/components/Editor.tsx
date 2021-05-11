@@ -120,7 +120,7 @@ const Editor = () => {
     if (!connection || !quillEditor) {
       return;
     }
-    // TODO: Only save if changes have been made
+    // TODO: Only save if changes have been made, use _.isEqual()
     const saveInterval = setInterval(() => {
       connection.emit("save-changes", quillEditor.getContents());
     }, SaveTimerMS.INTERVAL_MS);
