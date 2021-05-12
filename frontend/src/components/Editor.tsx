@@ -5,6 +5,7 @@ import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io-client/build/typed-events";
 import { useParams } from "react-router-dom";
 import SaveTimerMS from "../enums/SaveTimeOut";
+import { isEqual } from "lodash";
 
 const ToolbarOptions = [
   ["bold", "italic", "underline", "strike"], // toggled buttons
@@ -38,6 +39,7 @@ const Editor = () => {
   const [connection, setConnection] =
     useState<Socket<DefaultEventsMap, DefaultEventsMap> | undefined>();
   const [quillEditor, setQuillEditor] = useState<Quill | undefined>();
+  const [editorContents, setEditorContents] = useState();
   // Get the document ID from the URL
   const { id: documentID } = useParams<{ id: string }>();
 
